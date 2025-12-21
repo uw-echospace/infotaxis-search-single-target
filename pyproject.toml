@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infotaxis"
+version = "0.1.0"
+description = "Echolocation infotaxis search for single target"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Wu-Jung Lee", email = "leewujung@gmail.com"}
+]
+dependencies = [
+    "matplotlib",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "scipy",
+    "xarray",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "notebook",
+    "ipykernel",
+    "pytest",
+]
