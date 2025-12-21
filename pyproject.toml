@@ -15,7 +15,7 @@ authors = [
 dependencies = [
     "matplotlib",
     "netcdf4",
-    "numpy",
+    "numpy<2.4.0",
     "pandas",
     "scipy",
     "xarray",
