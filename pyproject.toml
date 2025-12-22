@@ -17,6 +17,7 @@ dependencies = [
     "netcdf4",
     "numpy<2.4.0",
     "pandas",
+    "seaborn",
     "scipy",
     "xarray",
 ]
