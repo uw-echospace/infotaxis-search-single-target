@@ -135,7 +135,7 @@ def k_to_cube(k, canvas_axial):
     -------
     Array of cube coordinates
     """
-    return axial_to_cube(k_to_axial(k, canvas_axial)),
+    return axial_to_cube(k_to_axial(k, canvas_axial))
 
 
 def get_cube_plot_xy(cube):
@@ -164,7 +164,11 @@ def cube_distance(cube1, cube2):
 
     Reference: https://www.redblobgames.com/grids/hexagons/#distances-cube
     """
-    return np.abs(cube1 - cube2).max()
+    cube_diff = np.abs(cube1 - cube2)
+    if cube_diff.ndim == 1:
+        return cube_diff.max()
+    else:
+        return np.abs(cube1 - cube2).max(axis=1)
 
 
 def cube_neighbor(cube, direction, distance=1):
@@ -233,7 +237,7 @@ def plot_one_hexgrid(ax, cube, gridcolor='w', gridalpha=0.3):
 
 
 def plot_hexgrids(ax, cube_array, cube_color,
-                  gridalpha=0.9, cmap='Blues', vmin_vmax=None):
+                  gridalpha=0.9, cmap='Blues', vmin_vmax=None, **colorbar_kwargs):
     """Plot multiple hexagons in specified colors.
 
     Parameters
@@ -282,6 +286,6 @@ def plot_hexgrids(ax, cube_array, cube_color,
             plot_one_hexgrid(ax, cube,
                              gridcolor=cc, gridalpha=gridalpha)
         im = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
-        cbar = matplotlib.pyplot.colorbar(im, ax=ax)
+        cbar = matplotlib.pyplot.colorbar(im, ax=ax, **colorbar_kwargs)
 
     return im, cbar
