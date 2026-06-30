@@ -21,10 +21,21 @@ class OneTargetHex(object):
     Attributes
     ----------
     param_animal or param_echo : dict of dict
-        simu_param[beam_radius]['pm_const']    pm or pfa; default=0.01 (required)
-        simu_param[beam_radius]['pfa_const']
-        simu_param[beam_radius]['pm_mtx']      pm or pfa as a function of search space (optional)
-        simu_param[beam_radius]['pfa_mtx']
+        pm or pfa; default=0.01 (required)
+            - simu_param[beam_radius]['pm_const']     
+            - simu_param[beam_radius]['pfa_const']
+
+        pm or pfa as a function of distance to beam aim (r) (optional)
+        *_beam_sigma_r is the standard deviation of the Gaussian distribution used in beam_dep_curve
+            - simu_param[beam_radius]['pm_beam_sigma_r']
+            - simu_param[beam_radius]['pfa_beam_sigma_r']
+            - simu_param[beam_radius]['pm_beam_scale']
+            - simu_param[beam_radius]['pfa_beam_scale']
+
+        pm or pfa as a function of search space (optional)
+            - simu_param[beam_radius]['pm_mtx']
+            - simu_param[beam_radius]['pfa_mtx']
+
     search_dict : dict
         dictionary for early stopping criteria and other search params
         None (default): next beam can be anywhere in the canvas
@@ -155,18 +166,45 @@ class OneTargetHex(object):
         self.h_est_all.append(np.array(list(self.h_est.values())))
         self.h_actual_all.append(np.copy(self.h_actual))
 
-    def pmpfa_fcn(self, fcn_type, k_cell, simu_type, beam_radius, verbose_opt=False):
+    def beam_dep_curve(self, r_cell, beam_sigma_r, beam_scale):
+        """
+        Producing a pm/pfa curve using the Gaussian distribution
+        with standard deviation dep_sigma.
+
+        Parameters
+        ----------
+        r_cell : number
+            grid distance to beam aim
+        beam_sigma_r : number
+            standard deviation of the Gaussian distribution
+        beam_scale : int
+            scale factor for the beam-dependent curve
+
+        Returns
+        -------
+        A function that takes in r and outputs a value between 0 and 1
+        according the Gaussian distribution with standard deviation dep_sigma.
+        """
+        val = np.exp(-0.5 * (r_cell / beam_sigma_r) ** 2)
+        return (1-val)*beam_scale + 1  # invert the curve as a multiplier
+
+    def pmpfa_fcn(self, fcn_type, k_axis, k_cell, simu_type, beam_radius, beam_scale_default=10, verbose_opt=False):
         """Generate probability of miss (pm) or probability of false alarm (pfa).
 
         Parameters
         ----------
         fcn_type : str
             whether it is for calculating pm or pfa
+        k_axis : array
+            flat index of cell on the beam axis
         k_cell : array
             flat index of cell
         simu_type : str
             'animal' -- for calculating expecations
-             'echo' -- for generating simulated echo
+            'echo' -- for generating simulated echo
+            if simu_type contain pm_beam_sigma_r or pfa_beam_sigma_r,
+            then compute beam-dependent pm or pfa using beam_dep_curve
+            pm_beam_scale and pfa_beam_scale default to 10 unless supplied
         beam_radius : int
             beam radius, used to index self.param_animal or self.param_echo
         verbose_opt : bool
@@ -208,7 +246,26 @@ class OneTargetHex(object):
             if verbose_opt:
                 print('No %s_mtx supplied, %s is not location dependent.' % (fcn_type, fcn_type))
 
-        p_beam = np.ones(k_cell.size)  # TODO: add back beam-dependent pmpfa generation
+        # beam-dependent pm or pfa
+        sigma_key = '%s_beam_sigma_r' % fcn_type
+        # check if pm_beam_sigma_r or pfa_beam_sigma_r is supplied in simu_param
+        if sigma_key not in simu_param:  # if not supplied, not beam-dependent effects
+            p_beam = np.ones(k_cell.size)
+        else:  # if supplied, compute beam-dependent effects
+            # compute distance from each of k_cell to k__get_p_X0
+            r_cell = hex_ops.cube_distance(
+                hex_ops.k_to_cube(k_cell, self.canvas_axial),
+                hex_ops.k_to_cube(k_axis, self.canvas_axial)
+            )
+            # compute p_beam using r_cell
+            p_beam = self.beam_dep_curve(
+                r_cell=r_cell,
+                beam_sigma_r=simu_param[sigma_key],
+                beam_scale=simu_param.get('%s_beam_scale' % fcn_type, beam_scale_default)
+            )
+            if verbose_opt:
+                print('%s_beam_sigma_r supplied, %s is beam dependent.' % (fcn_type, fcn_type))            
+
         p_target = np.ones(k_cell.size)  # TODO: add back target-dependent pmpfa generation
 
         # location-dependent pfa applied as a multiplier
@@ -259,15 +316,15 @@ class OneTargetHex(object):
 
                 # For cells covered by the beam
                 for kk, idx in zip(k_in_beam, array_idx_in_beam):  # given target at kk
-                    pm_kk = self.pmpfa_fcn(fcn_type='pm', k_cell=kk, simu_type='animal', beam_radius=beam_r)
+                    pm_kk = self.pmpfa_fcn(fcn_type='pm', k_axis=k_axis, k_cell=kk, simu_type='animal', beam_radius=beam_r)
                     k_in_beam_not_kk = np.setdiff1d(k_in_beam, kk, assume_unique=True)
-                    p_X1_Tk_Bk = 1 - pm_kk * np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam_not_kk,
+                    p_X1_Tk_Bk = 1 - pm_kk * np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam_not_kk,
                                                                         simu_type='animal', beam_radius=beam_r))
                     table_X1_tmp[idx] = p_X1_Tk_Bk
 
                 # For cells not covered by the beam
                 for kk_n, idx in zip(k_not_in_beam, array_idx_not_in_beam):  # given target at kk_n
-                    p_X1_Tk_B0 = 1 - np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam,
+                    p_X1_Tk_B0 = 1 - np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam,
                                                                 simu_type='animal', beam_radius=beam_r))
                     table_X1_tmp[idx] = p_X1_Tk_B0
 
@@ -279,16 +336,16 @@ class OneTargetHex(object):
                 table_X0_tmp = np.empty(k_canvas.shape)
 
                 # For cells covered by the beam
-                for kk, idx in zip(k_in_beam, array_idx_in_beam):
-                    pm_kk = self.pmpfa_fcn(fcn_type='pm', k_cell=kk, simu_type='animal', beam_radius=beam_r)
+                for kk, idx in zip(k_in_beam, array_idx_in_beam):  # given target at kk
+                    pm_kk = self.pmpfa_fcn(fcn_type='pm', k_axis=k_axis, k_cell=kk, simu_type='animal', beam_radius=beam_r)
                     k_in_beam_not_kk = np.setdiff1d(k_in_beam, kk, assume_unique=True)
-                    p_X0_Tk_Bk = pm_kk * np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam_not_kk,
+                    p_X0_Tk_Bk = pm_kk * np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam_not_kk,
                                                                     simu_type='animal', beam_radius=beam_r))
                     table_X0_tmp[idx] = p_X0_Tk_Bk
 
                 # For cells not covered by the beam
-                for kk_n, idx in zip(k_not_in_beam, array_idx_not_in_beam):
-                    p_X0_Tk_B0 = np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam,
+                for kk_n, idx in zip(k_not_in_beam, array_idx_not_in_beam):  # given target at kk_n
+                    p_X0_Tk_B0 = np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam,
                                                             simu_type='animal', beam_radius=beam_r))
                     table_X0_tmp[idx] = p_X0_Tk_B0
 
@@ -439,11 +496,14 @@ class OneTargetHex(object):
             # if idx in beam: miss at idx and no false alarm at all other grids
             k_others = np.setdiff1d(k_in_beam, k_idx, assume_unique=True)
             return (
-                self.pmpfa_fcn("pm", np.array(k_idx), "animal", beam_r)
-                * np.prod(1 - self.pmpfa_fcn("pfa", k_others, "animal", beam_r))
+                # self.pmpfa_fcn("pm", np.array(k_idx), "animal", beam_r)
+                # * np.prod(1 - self.pmpfa_fcn("pfa", k_others, "animal", beam_r))                
+                self.pmpfa_fcn(fcn_type="pm", k_axis=k_idx, k_cell=k_idx, simu_type="animal", beam_radius=beam_r)
+                * np.prod(1 - self.pmpfa_fcn(fcn_type="pfa", k_axis=k_idx, k_cell=k_others, simu_type="animal", beam_radius=beam_r))
             )
         else:
-            return np.prod(1 - self.pmpfa_fcn("pfa", k_in_beam, "animal", beam_r))
+            # return np.prod(1 - self.pmpfa_fcn("pfa", k_in_beam, "animal", beam_r))            
+            return np.prod(1 - self.pmpfa_fcn(fcn_type="pfa", k_axis=k_idx, k_cell=k_in_beam, simu_type="animal", beam_radius=beam_r))
 
     def get_est_ph(self):
         """
@@ -521,9 +581,9 @@ class OneTargetHex(object):
                     else:
                         p_X1_tB_tmp[seq] = (
                             1 -
-                            self.pmpfa_fcn(fcn_type='pm', k_cell=kk,
+                            self.pmpfa_fcn(fcn_type='pm', k_axis=k_axis, k_cell=kk,
                                             simu_type='animal', beam_radius=beam_r) *
-                            np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam_not_kk,
+                            np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam_not_kk,
                                                         simu_type='animal', beam_radius=beam_r))
                         ) * \
                         (dk_curr[array_idx_in_beam[seq]] / np.sum(dk_curr[array_idx_in_beam]))  # prob of target in k given k in beam
@@ -532,7 +592,7 @@ class OneTargetHex(object):
                 # p(X=1 | target not in B)
                 # does not need to consider where exactly k is in the beam,
                 # so no scaling related to dk like in the p_X1_tB_tmp loop
-                p_X1_tnB = 1 - np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_cell=k_in_beam,
+                p_X1_tnB = 1 - np.prod(1 - self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_in_beam,
                                                           simu_type='animal', beam_radius=beam_r))
                 #--------------------------
                 # Put everything together
@@ -805,6 +865,7 @@ class OneTargetHex(object):
         """
 
         # Flattened index
+        k_axis = hex_ops.cube_to_k(self.aim_last_cube, self.canvas_axial)
         k_in_beam = hex_ops.cube_to_k(self.beam_cover_last_cube, self.canvas_axial)
         k_target = hex_ops.cube_to_k(self.target_cube, self.canvas_axial)
         k_others = np.setdiff1d(k_in_beam, k_target, assume_unique=True)  # cells in beam that does not contain target
@@ -812,9 +873,9 @@ class OneTargetHex(object):
         # Find out if an echo was received
         if np.isin(k_target, k_in_beam):   # target covered in beam
             echo_k_others = np.random.uniform(size=k_others.size) < \
-                           self.pmpfa_fcn(fcn_type='pfa', k_cell=k_others, simu_type='echo', beam_radius=self.radius_last)
+                           self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_others, simu_type='echo', beam_radius=self.radius_last)
             echo_k_target = np.random.uniform(size=1) > \
-                           self.pmpfa_fcn(fcn_type='pm', k_cell=k_target, simu_type='echo', beam_radius=self.radius_last)
+                           self.pmpfa_fcn(fcn_type='pm', k_axis=k_axis, k_cell=k_target, simu_type='echo', beam_radius=self.radius_last)
             echo_val = bool(np.any(echo_k_others) or np.any(echo_k_target))
             if echo_val:
                 print('ECHO!')
@@ -824,7 +885,7 @@ class OneTargetHex(object):
                 echo_type = False
         else:   # target not covered in beam
             echo_k_others = np.random.uniform(size=k_in_beam.size) < \
-                           self.pmpfa_fcn(fcn_type='pfa', k_cell=k_others, simu_type='echo', beam_radius=self.radius_last)
+                           self.pmpfa_fcn(fcn_type='pfa', k_axis=k_axis, k_cell=k_others, simu_type='echo', beam_radius=self.radius_last)
             echo_val = bool(np.any(echo_k_others))
             if echo_val:
                 print('FALSE ALARM!')
