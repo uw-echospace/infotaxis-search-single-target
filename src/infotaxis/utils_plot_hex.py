@@ -279,7 +279,7 @@ def plot_latest_update(simulation, plot_attrs=PLOT_ATTRS, orientation='horizonta
     return fig
 
 
-def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizontal'):
+def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizontal', fig=None):
     """Plot update after the specified ping number from a .nc file.
 
     Parameters
@@ -299,6 +299,8 @@ def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizont
     orientation : str
         'horizontal' - entropy plot to the right of dk and h_est map (default)
         'vertical' - entropy plot below dk and h_est map
+    fig : matplotlib.figure.Figure, optional
+        Figure to plot on. If None, creates a new figure.
 
     Returns
     -------
@@ -312,16 +314,25 @@ def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizont
         echo_type = ds['echo_type_all'].isel(steps=ping_num).values
         echo_type_str = get_echo_type_str(echo_value=echo_value, echo_type=echo_type)
 
+        # Clear figure if provided, otherwise create new one
+        create_new_fig = fig is None
+        if fig is not None:
+            fig.clear()
+        else:
+            if orientation == 'horizontal':
+                fig = plt.figure(figsize=(16, 3))
+            elif orientation == 'vertical':
+                fig = plt.figure(figsize=(7, 5.5))
+            else:
+                ValueError("Specified figure orientation not supported.")
+                
+        # Set up gridspec
         if orientation == 'horizontal':
-            fig = plt.figure(figsize=(16, 3))
             gs_L = fig.add_gridspec(1, 2, left=0.05, right=0.50)
             gs_R = fig.add_gridspec(1, 1, left=0.56, right=0.95)
         elif orientation == 'vertical':
-            fig = plt.figure(figsize=(7, 5.5))
-            gs_L = fig.add_gridspec(1, 2, left=0.05, right=0.95, bottom=0.53, top=0.95)
-            gs_R = fig.add_gridspec(1, 1, left=0.05, right=0.95, bottom=0.05, top=0.45)
-        else:
-            ValueError("Specified figure orientation not supported.")
+            gs_L = fig.add_gridspec(1, 2, left=0.05, right=0.95, bottom=0.53, top=0.93)
+            gs_R = fig.add_gridspec(1, 1, left=0.09, right=0.95, bottom=0.11, top=0.45)
 
         # Construct env_attrs for plotting
         env_attrs = dict(target_loc=ds.attrs['target_loc'])
@@ -332,7 +343,7 @@ def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizont
         # Target probability map
         ax = fig.add_subplot(gs_L[0, 0])
         plot_dk_map(
-            ax, 'P_T',
+            ax, r'$P_K(k)$',
             canvas_cube=ds['canvas_cube'].values,
             canvas_vmap=ds['d_all'].isel(steps=ping_num).values,
             beam_cube=ds['beam_cube_all'].isel(steps=slice(0, ping_num + 1)).values,
@@ -347,7 +358,7 @@ def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizont
         # Expected entropy map
         ax = fig.add_subplot(gs_L[0, 1])
         plot_dk_map(
-            ax, 'entropy',
+            ax, r'$E_X[H_s]$',
             canvas_cube=ds['canvas_cube'].values,
             canvas_vmap=ds['h_est_all'].isel(steps=ping_num).sel(beam_radius=beam_r).values,
             beam_cube=ds['beam_cube_all'].isel(steps=slice(0, ping_num + 1)).values,
@@ -375,9 +386,11 @@ def plot_step_from_nc(ds, ping_num, plot_attrs=PLOT_ATTRS, orientation='horizont
             ds['h_actual_all'].isel(steps=slice(0, ping_num + 1)).values,
             ds['h_est_all'].isel(steps=slice(0, ping_num + 1)).values,
             plot_attrs)
-        ax.set_title('Ping #%02d     entropy variation' % (ping_num + 1),
+        ax.set_title('Ping #%02d     entropy variation' % (ping_num),
                         fontsize=plot_attrs['title_fontsize'])
 
-        plt.show()
+        # Only show if we created a new figure (not for animation)
+        if create_new_fig:
+            plt.show()
 
         return fig
