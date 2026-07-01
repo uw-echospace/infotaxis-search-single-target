@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from simulation_data_prep import assemble_ph, assemble_summary
+from data_prep_plot.simulation_data_prep import assemble_ph, assemble_summary
 
 
 path_main = Path("/Volumes/ssd_2tb_1/infotaxis_simu_2026")
