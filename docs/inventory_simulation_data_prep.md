@@ -1,0 +1,70 @@
+## Simulation data preparation
+
+- data folder: 20251027
+    - infotaxis and MAP in simple condition
+    - infotaxis
+        - assemble summary
+            - `20260602_assemble_summary_match_MAP.py`
+        - pmax_th=0.95: `20260530_match_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+        - pmax_th=0.99: `20260530_match_pmax0.99_pmaxDiff1e-5_infotaxis.py`
+    - MAP: assemble summary
+        - assemble summary
+            - `20260602_assemble_summary_match_infotaxis.py`
+        - pmax_th=0.95
+            - `20260530_match_pmax0.95_pmaxDiff1e-5_MAP.py`
+        - pmax_th=0.99
+            - `20260530_match_pmax0.99_pmaxDiff1e-5_MAP.py`
+- data folder: 20251113
+    - infotaxis with PM sweep/PFA=0 or PFA sweep/PM=0
+    - assemble summary
+        - `20260608_assemble_summary_pm_sweep_infotaxis.py`
+        - `20260608_assemble_summary_pm_sweep_MAP.py`
+        - `20260608_assemble_summary_pfa_sweep_infotaxis.py`
+        - `20260608_assemble_summary_pfa_sweep_MAP.py`
+    - gather success info
+        - `20260608_pfa_sweep_pmax0.95_pmaxDiff1e-5_MAP.py`
+        - `20260608_pfa_sweep_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+        - `20260608_pm_sweep_pmax0.95_pmaxDiff1e-5_MAP.py`
+        - `20260608_pm_sweep_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+- data folder: 20251118
+    - infotaxis with beam movement restriction
+    - assemble summary
+        - `20260608_assemble_summary_infotaxis_beam_movement_restriction.py`
+    - gather success info
+        - `20260608_infotaxis_beam_movement_restriction_pmax0.95_pmaxDiff1e-5.py`
+- data folder: 20251119
+    - infotaxis mismatch agentLower
+    - assemble summary
+        - `20260602_assemble_summary_mismatch_agentLower_infotaxis.py`
+    - gather success info:
+        - `20260530_mismatch_agentLower_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+- data folder: 20260513
+    - infotaxis mismatch agentHigher
+    - assemble summary
+        - `20260602_assemble_summary_mismatch_agentHigher_infotaxis.py`
+    - gather success info
+        - `20260530_mismatch_agentHigher_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+- data folder: 20260520
+    - MAP beam-dependent
+        - assemble summary
+            - `20260520_assemble_summary_ph_csv_beam_dep_MAP.ipynb`
+        - gather success info
+            - `20260530_beam_dep_pmax0.95_pmaxDiff1e-5_MAP.py`
+- data folder: 20260522
+    - infotaxis beam-dependent
+    - assemble summary
+        - `20260522_assemble_summary_ph_csv_beam_dep_infotaxis.ipynb`
+    - gather success info
+        - `20260530_beam_dep_pmax0.95_pmaxDiff1e-5_infotaxis.py`
+- data folder: 20260524_MAP_mismatch_agentLower
+    - MAP mismatch agentLower
+    - assemble summary
+        - `20260602_assemble_summary_mismatch_agentLower_MAP.py`
+    - gather success info
+        - `20260530_mismatch_agentLower_pmax0.95_pmaxDiff1e-5_MAP.py`
+- data folder: 20260524_MAP_mismatch_agentHigher
+    - MAP mismatch agentHigher
+    - assemble summary
+        - `20260602_assemble_summary_mismatch_agentHigher_MAP.py`
+    - gather success info
+        - `20260530_mismatch_agentHigher_pmax0.95_pmaxDiff1e-5_MAP.py`

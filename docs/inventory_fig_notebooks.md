@@ -1,0 +1,35 @@
+## Figure notebooks
+
+### Main text figures
+- Fig. 1
+    - conceptual fig
+- Fig. 2
+    - `20260609_fig_search_setup.ipynb`
+- Fig. 3
+    - panel AF: `20260610_fig_infotaxis_simple_search.ipynb`
+    - panel BG: `20260610_fig_infotaxis_beam_size_change_2sizes.ipynb`
+    - panel CH: `20260610_fig_infotaxis_beam_size_change_3sizes.ipynb`
+    - panel DI: `20260610_fig_infotaxis_false_alarm.ipynb`
+    - panel EJ: `20260610_fig_infotaxis_miss.ipynb`
+- Fig. 4
+    - `20260531_fig_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. 5
+    - `20260531_fig_infotaxis_MAP_cmp_mismatch_agentLower_pmax0.95.ipynb`
+- Fig. 6
+    - `20260531_fig_infotaxis_MAP_cmp_mismatch_agentHigher_pmax0.95.ipynb`
+- Fig. 7
+    - panel A: `20260609_fig_sketch_no_overlap.ipynb`
+    - panel B: `20251105_fig_entropy_slope.ipynb`
+- Fig. 8
+    - panel A: `20260609_fig_sketch_current_neighbor_beam_aim.ipynb`
+    - panels BCD: `20251221_fig_repeat_beam_aim.ipynb`
+        - data notebook 1: `20251221_fig_repeat_beam_aim_prototype_num_grids.ipynb`
+            - produces `20251221_num_grid.csv`
+        - data notebook 2: `20251221_fig_repeat_beam_aim_prototype_pfa_full_range.ipynb`
+            - produces `cr{CR}_br{BR}_pfa_full_range.csv` in folder `20251221_h_est_pm1e-03`
+        - data notebook 3: `20251221_fig_repeat_beam_aim_prototype_pfa_crossover_values.ipynb`
+            - produces `cr{CR}_br{BR}_pm1e-03_pfaPrecision{1e-03,1e-04,1e-05}.csv` in folder `20251221_h_est_pm1e-03`
+            - produces: `20251221_pfa_crossover_pm1e-03.csv`
+- Fig. 9
+    - panels AB: `20260610_fig_MAP_simple_search.ipynb`
+    - panel C: `20260609_fig_last_pmax_h_actual_infotaxis_MAP_cmp_cr5_br1_pmax0.95.ipynb`
