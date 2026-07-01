@@ -29,3 +29,10 @@ dev = [
     "ipykernel",
     "pytest",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["infotaxis*", "data_prep_plot*"]
