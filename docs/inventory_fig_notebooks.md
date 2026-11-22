@@ -33,3 +33,50 @@
 - Fig. 9
     - panels AB: `20260610_fig_MAP_simple_search.ipynb`
     - panel C: `20260609_fig_last_pmax_h_actual_infotaxis_MAP_cmp_cr5_br1_pmax0.95.ipynb`
+
+
+### Supporting figures
+- Fig. A
+    - panel A: `20260610_fig_infotaxis_restricted_beam_movement.ipynb`
+    - panel BC: `20260609_fig_beam_movement_restriction_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. B
+    - `20260610_fig_pfa_boundary_grids.ipynb`
+- Fig. C
+    - panel AC: `20260610_fig_infotaxis_1missEarly_1faLate.ipynb`
+    - panel BD: `20260610_fig_infotaxis_1faEarly_1missLate.ipynb`
+- Fig. D
+    - `20260531_fig_infotaxis_MAP_cmp_pmax0.99.ipynb`
+- Fig. E
+    - `20260609_fig_pfa_sweep_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. F
+    - `20260609_fig_pm_sweep_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. G
+    - `20260531_fig_last_pmax_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. H
+    - `20260531_fig_last_h_actual_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. I
+    - `20260602_fig_path_length_infotaxis_MAP_cmp_pmax0.95.ipynb`
+- Fig. J
+    - `20260610_fig_infotaxis_mismatch_detail_cr5.ipynb`
+- Fig. K
+    - `20260531_fig_last_pmax_mismatch_agentLower_pmax0.95.ipynb`
+- Fig. L
+    - `20260531_fig_last_h_actual_mismatch_agentLower_pmax0.95.ipynb`
+- Fig. M
+    - `20260602_fig_path_length_mismatch_agentLower_pmax0.95_infotaxis.ipynb`
+- Fig. N
+    - `20260531_fig_last_pmax_mismatch_agentHigher_pmax0.95.ipynb`
+- Fig. O
+    - `20260531_fig_last_h_actual_mismatch_agentHigher_pmax0.95.ipynb`
+- Fig. P
+    - `20260602_fig_path_length_mismatch_agentHigher_pmax0.95_infotaxis.ipynb`
+- Fig. Q
+    - `20260531_fig_infotaxis_MAP_cmp_mismatch_agentLower_pmax0.95.ipynb`
+- Fig. R
+    - `20260531_fig_infotaxis_MAP_cmp_mismatch_agentHigher_pmax0.95.ipynb`
+- Fig. S
+    - `20260609_fig_per_run_computation_time_infotaxis_MAP_cmp.ipynb`
+- Fig. T
+    - `20260531_fig_beam_dep_pmax0.95_infotaxis.ipynb`
+- Fig. U
+    - `20260531_fig_beam_dep_pmax0.95_MAP.ipynb`
